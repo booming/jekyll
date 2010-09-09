@@ -35,8 +35,8 @@ module Jekyll
     # Transform the contents based on the content type.
     #
     # Returns nothing
-    def transform
-      self.content = converter.convert(self.content)
+    def transform(payload=nil)
+      self.content = converter.convert(self.content, payload)
     end
 
     # Determine the extension depending on content_type
@@ -52,30 +52,31 @@ module Jekyll
       @converter ||= self.site.converters.find { |c| c.matches(self.ext) }
     end
 
+    def layout_renderer(ext=self.ext)
+      @renderer ||= {}
+      @renderer[ext] ||= self.site.layout_renders.find { |c| c.matches(ext) }
+    end
+
     # Add any necessary layouts to this convertible document
     #   +layouts+ is a Hash of {"name" => "layout"}
     #   +site_payload+ is the site payload hash
     #
     # Returns nothing
     def do_layout(payload, layouts)
-      info = { :filters => [Jekyll::Filters], :registers => { :site => self.site } }
+      payload['pygments_prefix'] = converter.pygments_prefix
+      payload['pygments_suffix'] = converter.pygments_suffix
 
-      # render and transform content (this becomes the final content of the object)
-      payload["pygments_prefix"] = converter.pygments_prefix
-      payload["pygments_suffix"] = converter.pygments_suffix
-      self.content = Liquid::Template.parse(self.content).render(payload, info)
-      self.transform
-
-      # output keeps track of what will finally be written
+      self.content = layout_renderer.do_pre_transform(self.content, payload, self.site)
+      self.transform(payload)
       self.output = self.content
-
-      # recursively render layouts
-      layout = layouts[self.data["layout"]]
+      layout = layouts[self.data['layout']]
       while layout
-        payload = payload.deep_merge({"content" => self.output, "page" => layout.data})
-        self.output = Liquid::Template.parse(layout.content).render(payload, info)
-
-        layout = layouts[layout.data["layout"]]
+        payload = payload.deep_merge({
+          "content" => self.output,
+          "page" => layout.data
+        })
+        self.output = layout_renderer(layout.ext).do_layout(layout.content, payload, self.site)
+        layout = layouts[layout.data['layout']]
       end
     end
   end

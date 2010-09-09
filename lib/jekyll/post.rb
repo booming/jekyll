@@ -198,12 +198,16 @@ module Jekyll
       end
     end
 
+    def title
+      self.data["title"] || self.slug.split('-').select {|w| w.capitalize! || w }.join(' ')
+    end
+
     # Convert this post into a Hash for use in Liquid templates.
     #
     # Returns <Hash>
     def to_liquid
       self.data.deep_merge({
-        "title"      => self.data["title"] || self.slug.split('-').select {|w| w.capitalize! || w }.join(' '),
+        "title"      => self.title,
         "url"        => self.url,
         "date"       => self.date,
         "id"         => self.id,
@@ -215,7 +219,7 @@ module Jekyll
     end
 
     def inspect
-      "<Post: #{self.id}>"
+      "#<Jekyll:Post @id=#{self.id.inspect}>"
     end
 
     def next

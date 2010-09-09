@@ -13,7 +13,7 @@ module Jekyll
       ext
     end
 
-    def convert(content)
+    def convert(content, payload=nil)
       content
     end
 

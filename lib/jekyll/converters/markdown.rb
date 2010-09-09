@@ -66,7 +66,7 @@ module Jekyll
       ".html"
     end
 
-    def convert(content)
+    def convert(content, payload=nil)
       setup
       case @config['markdown']
         when 'rdiscount'

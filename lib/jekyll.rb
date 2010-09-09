@@ -39,8 +39,10 @@ require 'jekyll/errors'
 # extensions
 require 'jekyll/plugin'
 require 'jekyll/converter'
+require 'jekyll/layout_render'
 require 'jekyll/generator'
 require_all 'jekyll/converters'
+require_all 'jekyll/layout_renders'
 require_all 'jekyll/generators'
 require_all 'jekyll/tags'
 
