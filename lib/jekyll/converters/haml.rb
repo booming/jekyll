@@ -15,7 +15,7 @@ module Jekyll
     end
 
     def matches(ext)
-      ext =~ /haml/i
+      ext =~ /haml/i && @config['haml']
     end
 
     def output_ext(ext)
@@ -25,7 +25,7 @@ module Jekyll
     def convert(content, payload=nil)
       setup
       begin
-        haml_engine = Haml::Engine.new(content)
+        haml_engine = Haml::Engine.new(content, engine_options)
         payload = {} unless payload
 
         payload.merge!(:testing => 'woohoo')
@@ -35,6 +35,20 @@ module Jekyll
         STDERR.puts 'HAML parsing error: ' + e.message
         raise FatalException
       end
+    end
+
+    private
+    def engine_options
+      if @config['haml'].is_a?(Hash)
+        # Convert the keys to symbols, for HAML.
+        # This means we don't have to store them in YAML like format ::html5.
+        @config['haml'].inject({}) do |result, (k,v)|
+          result[k.to_sym] = v
+        result
+        end
+      else
+        {}
+     end
     end
   end
 
