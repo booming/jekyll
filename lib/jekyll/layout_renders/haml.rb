@@ -5,12 +5,22 @@ module Jekyll
 
     def setup
       return if @setup
-      require 'haml'
+
+      begin
+        require 'haml'
+      rescue LoadError
+        STDERR.puts 'You are missing the required library for HAML'
+        STDERR.puts '  $ [sudo] gem install haml'
+        raise FatalException.new('Missing dependency: haml')
+      end
+
+      # Attempt to load hashie if we can, if not do nothing.
+      begin
+        require 'hashie'
+      rescue LoadError
+      end
+
       @setup = true
-    rescue LoadError
-      STDERR.puts 'You are missing the required library for HAML'
-      STDERR.puts '  $ [sudo] gem install haml'
-      raise FatalException.new('Missing dependency: haml')
     end
 
     def do_pre_transform(content, payload, site)
@@ -20,6 +30,13 @@ module Jekyll
 
     def do_layout(content, payload, site)
       setup
+
+      # Try running the payload through hashie.
+      begin
+        payload = Hashie::Mash.new(payload)
+      rescue
+      end
+
       begin
         Haml::Engine.new(content, engine_options).render(Object.new, payload)
       rescue StandardError => e

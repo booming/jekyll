@@ -6,12 +6,22 @@ module Jekyll
 
     def setup
       return if @setup
-      require 'haml'
+
+      begin
+        require 'haml'
+      rescue LoadError
+        STDERR.puts 'You are missing the required library for HAML'
+        STDERR.puts '  $ [sudo] gem install haml'
+        raise FatalException.new('Missing dependency: haml')
+      end
+
+      # Attempt to load hashie if we can, if not do nothing.
+      begin
+        require 'hashie'
+      rescue LoadError
+      end
+
       @setup = true
-    rescue LoadError
-      STDERR.puts 'You are missing the required library for HAML'
-      STDERR.puts '  $ [sudo] gem install haml'
-      raise FatalException.new("Missing dependency: haml")
     end
 
     def matches(ext)
@@ -24,12 +34,16 @@ module Jekyll
 
     def convert(content, payload=nil)
       setup
+
+      # Try running payload through hashie.
+      begin
+        payload = Hashie::Mash.new(payload)
+      rescue
+      end
+
       begin
         haml_engine = Haml::Engine.new(content, engine_options)
-        payload = {} unless payload
-
-        payload.merge!(:testing => 'woohoo')
-
+        payload ||= {}
         haml_engine.render(Object.new, payload)
       rescue StandardError => e
         STDERR.puts 'HAML parsing error: ' + e.message
