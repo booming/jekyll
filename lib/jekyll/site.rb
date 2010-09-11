@@ -4,7 +4,7 @@ module Jekyll
     attr_accessor :config, :layouts, :posts, :pages, :static_files,
                   :categories, :exclude, :source, :dest, :lsi, :pygments,
                   :permalink_style, :tags, :time, :future, :safe, :plugins
-    attr_accessor :converters, :layout_renders, :generators
+    attr_accessor :converters, :layout_renderers, :generators
 
     # Initialize the site
     #   +config+ is a Hash containing site configurations details
@@ -58,7 +58,7 @@ module Jekyll
         c.new(self.config)
       end
 
-      self.layout_renders = Jekyll::LayoutRender.subclasses.select do |c|
+      self.layout_renderers = Jekyll::LayoutRender.subclasses.select do |c|
         !self.safe || c.safe
       end.map do |c|
         c.new(self.config)

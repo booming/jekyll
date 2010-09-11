@@ -54,7 +54,7 @@ module Jekyll
 
     def layout_renderer(ext=self.ext)
       @renderer ||= {}
-      @renderer[ext] ||= self.site.layout_renders.find { |c| c.matches(ext) }
+      @renderer[ext] ||= self.site.layout_renderers.find { |c| c.matches(ext) }
     end
 
     # Add any necessary layouts to this convertible document
