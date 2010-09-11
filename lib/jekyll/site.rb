@@ -260,6 +260,7 @@ module Jekyll
       {"site" => self.config.merge({
           "time"       => self.time,
           "posts"      => self.posts.sort { |a,b| b <=> a },
+          "collated_posts" => self.collated_posts,
           "pages"      => self.pages,
           "html_pages" => self.pages.reject { |page| !page.html? },
           "categories" => post_attr_hash('categories'),

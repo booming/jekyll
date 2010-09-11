@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
 
   s.name              = 'jekyll'
   s.version           = '0.7.0'
-  s.date              = '2010-08-24'
+  s.date              = '2010-09-11'
   s.rubyforge_project = 'jekyll'
 
   s.summary     = "A simple, blog aware, static site generator."
@@ -55,7 +55,9 @@ Gem::Specification.new do |s|
     jekyll.gemspec
     lib/jekyll.rb
     lib/jekyll/albino.rb
+    lib/jekyll/archive.rb
     lib/jekyll/converter.rb
+    lib/jekyll/converters/haml.rb
     lib/jekyll/converters/identity.rb
     lib/jekyll/converters/markdown.rb
     lib/jekyll/converters/textile.rb
@@ -66,6 +68,9 @@ Gem::Specification.new do |s|
     lib/jekyll/generator.rb
     lib/jekyll/generators/pagination.rb
     lib/jekyll/layout.rb
+    lib/jekyll/layout_render.rb
+    lib/jekyll/layout_renders/haml.rb
+    lib/jekyll/layout_renders/liquid.rb
     lib/jekyll/migrators/csv.rb
     lib/jekyll/migrators/mephisto.rb
     lib/jekyll/migrators/mt.rb
