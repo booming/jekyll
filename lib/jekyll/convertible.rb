@@ -27,9 +27,28 @@ module Jekyll
         self.content = self.content[($1.size + $2.size)..-1]
 
         self.data = YAML.load($1)
+
+        # If this object has a place for storing extended content then look for
+        # some.
+        if self.respond_to?(:extended)
+          if self.data && self.data.key?('extended')
+            marker = self.data['extended']
+            self.content, self.extended = self.content.split(marker + "\n", 2)
+          end
+        end
       end
 
       self.data ||= {}
+    end
+
+    # Runs content though any pre_transform converters.
+    #
+    # Returns nothing.
+    def pre_transform(payload)
+      self.content = layout_renderer.do_pre_transform(self.content, payload, self.site)
+      if self.respond_to?(:extended) && self.extended
+        self.extended = layout_renderer.do_pre_transform(self.extended, payload, self.site)
+      end
     end
 
     # Transform the contents based on the content type.
@@ -37,6 +56,9 @@ module Jekyll
     # Returns nothing
     def transform(payload=nil)
       self.content = converter.convert(self.content, payload)
+      if self.respond_to?(:extended) && self.extended
+        self.extended = converter.convert(self.extended, payload)
+      end
     end
 
     # Determine the extension depending on content_type
@@ -66,9 +88,13 @@ module Jekyll
       payload['pygments_prefix'] = converter.pygments_prefix
       payload['pygments_suffix'] = converter.pygments_suffix
 
-      self.content = layout_renderer.do_pre_transform(self.content, payload, self.site)
+      self.pre_transform(payload)
       self.transform(payload)
-      self.output = self.content
+      self.output = if self.respond_to?(:extended) && self.extended
+        self.content + self.extended
+      else
+        self.content
+      end
       layout = layouts[self.data['layout']]
       while layout
         payload = payload.deep_merge({

@@ -19,7 +19,7 @@ module Jekyll
     end
 
     attr_accessor :site
-    attr_accessor :data, :content, :output, :ext
+    attr_accessor :data, :content, :extended, :output, :ext
     attr_accessor :date, :slug, :published, :tags, :categories
 
     # Initialize this Post instance.
@@ -215,7 +215,8 @@ module Jekyll
         "next"       => self.next,
         "previous"   => self.previous,
         "tags"       => self.tags,
-        "content"    => self.content })
+        "content"    => self.content,
+        "extended"   => self.extended || '' })
     end
 
     def inspect
