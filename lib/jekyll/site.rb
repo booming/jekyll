@@ -1,6 +1,7 @@
 module Jekyll
 
   class Site
+    attr_accessor :collated_posts
     attr_accessor :config, :layouts, :posts, :pages, :static_files,
                   :categories, :exclude, :source, :dest, :lsi, :pygments,
                   :permalink_style, :tags, :time, :future, :safe, :plugins
@@ -35,6 +36,7 @@ module Jekyll
                              end
       self.layouts         = {}
       self.posts           = []
+      self.collated_posts  = {}
       self.pages           = []
       self.static_files    = []
       self.categories      = Hash.new { |hash, key| hash[key] = [] }
@@ -87,6 +89,10 @@ module Jekyll
     def read
       self.read_layouts # existing implementation did this at top level only so preserved that
       self.read_directories
+      self.read_archives
+    end
+
+    def read_archives
     end
 
     # Read all the files in <source>/<dir>/_layouts and create a new Layout
@@ -128,6 +134,14 @@ module Jekyll
       end
 
       self.posts.sort!
+      # Add posts to a collated posts hash.
+      self.posts.reverse.each do |post|
+        y, m, d = post.date.year, post.date.month, post.date.day
+        self.collated_posts[y] ||= {}
+        self.collated_posts[y][m] ||= {}
+        self.collated_posts[y][m][d] ||= []
+        self.collated_posts[y][m][d] << post
+      end
     end
 
     def generate
@@ -151,16 +165,43 @@ module Jekyll
       # ignore missing layout dir
     end
 
-    # Write static files, pages and posts
+    # Write the archive layout to the correct location.
+    # For example archive_yearly is written to <dest>/<year>/index.html
+    def write_archive(dir, name, posts)
+      archive = Archive.new(self, self.source, dir, name, posts)
+      archive.render(self.layouts, site_payload)
+      archive.write(self.dest)
+    end
+
+    # Write static files, pages, posts and archives.
     #
     # Returns nothing
     def write
       self.posts.each do |post|
         post.write(self.dest)
       end
+
+      # Write the archive files if the layouts exist.
+      self.collated_posts.each do |year, months|
+        if layout = self.layouts['archive_yearly']
+          self.write_archive(year.to_s, layout.name, months)
+        end
+        months.each do |month, days|
+          if layout = self.layouts['archive_monthly']
+            self.write_archive("%04d/%02d" % [y.to_s, m.to_s], layout.name, days)
+          end
+          days.each do |d, posts|
+            if layout = self.layouts['archive_daily']
+              self.write_archive("%04d/%02d/%02d" % [y.to_s, m.to_s, d.to_s], layout.name, posts)
+            end
+          end
+        end
+      end
+
       self.pages.each do |page|
         page.write(self.dest)
       end
+
       self.static_files.each do |sf|
         sf.write(self.dest)
       end
