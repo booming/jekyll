@@ -47,11 +47,40 @@ module Jekyll
     def setup
       require 'classifier' if self.lsi
 
+      # Require Haml stuff here, rather than a setup in the converter
+      # or layout render; saves us repeating the same code.
+      if self.config['haml']
+        begin
+          require 'haml'
+        rescue LoadError
+          STDERR.puts 'You are missing the required library for HAML'
+          STDERR.puts '  $ [sudo] gem install haml'
+          raise FatalException.new('Missing dependency: haml')
+        end
+
+        # Attempt to load hashie gem; we don't care about failure really, but
+        # nice thing to have as it allows access to payload via dot notation.
+        begin
+          require 'hashie'
+        rescue LoadError
+        end
+
+        require File.join(File.dirname(__FILE__), 'haml_helpers')
+      end
+
       # If safe mode is off, load in any ruby files under the plugins
-      # directory.
+      # directory and look for any user defined helpers.
       unless self.safe
         Dir[File.join(self.plugins, "**/*.rb")].each do |f|
           require f
+        end
+
+        helpers = File.join(self.source, '_helpers.rb')
+        if File.exists?(helpers)
+          require helpers
+          # Add the helpers to Liquid and if enabled Haml helpers.
+          Jekyll::Filters.extend(Jekyll::Helpers)
+          Jekyll::HamlHelpers.extend(Jekyll::Helpers) if self.config['haml']
         end
       end
 
