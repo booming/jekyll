@@ -1,7 +1,7 @@
 module Jekyll
 
   class Site
-    attr_accessor :collated_posts
+    attr_accessor :collated_posts, :archives
     attr_accessor :config, :layouts, :posts, :pages, :static_files,
                   :categories, :exclude, :source, :dest, :lsi, :pygments,
                   :permalink_style, :tags, :time, :future, :safe, :plugins
@@ -37,6 +37,7 @@ module Jekyll
       self.layouts         = {}
       self.posts           = []
       self.collated_posts  = {}
+      self.archives        = []
       self.pages           = []
       self.static_files    = []
       self.categories      = Hash.new { |hash, key| hash[key] = [] }
@@ -141,6 +142,27 @@ module Jekyll
         self.collated_posts[y][m] ||= {}
         self.collated_posts[y][m][d] ||= []
         self.collated_posts[y][m][d] << post
+      end
+
+      # Create a archives_monthly array for easier display of archives
+      # in a list.
+      # example:
+      # - March 2010 (1)
+      # - February 2010 (2)
+      self.collated_posts.each do |y, months|
+        months.each do |m, days|
+          days.each do |d, posts|
+            self.archives << {
+              'name' => "#{Date::MONTHNAMES[m]} #{y}",
+              'url' => "%04d/%02d" % [y, m],
+              'year' => y,
+              'month' => m,
+              'str_month' => Date::MONTHNAMES[m],
+              'posts' => posts,
+              'count' => posts.length
+            }
+          end
+        end
       end
     end
 
@@ -261,6 +283,7 @@ module Jekyll
           "time"       => self.time,
           "posts"      => self.posts.sort { |a,b| b <=> a },
           "collated_posts" => self.collated_posts,
+          "monthly_archives" => self.archives,
           "pages"      => self.pages,
           "html_pages" => self.pages.reject { |page| !page.html? },
           "categories" => post_attr_hash('categories'),
