@@ -125,10 +125,6 @@ module Jekyll
     def read
       self.read_layouts # existing implementation did this at top level only so preserved that
       self.read_directories
-      self.read_archives
-    end
-
-    def read_archives
     end
 
     # Read all the files in <source>/<dir>/_layouts and create a new Layout
