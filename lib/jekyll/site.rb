@@ -4,7 +4,8 @@ module Jekyll
     attr_accessor :collated_posts, :archives
     attr_accessor :config, :layouts, :posts, :pages, :static_files,
                   :categories, :exclude, :source, :dest, :lsi, :pygments,
-                  :permalink_style, :tags, :time, :future, :safe, :plugins
+                  :permalink_style, :tags, :time, :future, :safe, :plugins,
+                  :category_permalink_style
     attr_accessor :converters, :layout_renderers, :generators
 
     # Initialize the site
@@ -21,6 +22,7 @@ module Jekyll
       self.lsi             = config['lsi']
       self.pygments        = config['pygments']
       self.permalink_style = config['permalink'].to_sym
+      self.category_permalink_style = config['category_permalink'].to_sym
       self.exclude         = config['exclude'] || []
       self.future          = config['future']
 
@@ -250,6 +252,16 @@ module Jekyll
               self.write_archive("%04d/%02d/%02d" % [y.to_s, m.to_s, d.to_s], layout.name, posts)
             end
           end
+        end
+      end
+
+      # Write category index pages if the layout exists.
+      if layout = self.layouts['category_index']
+        self.categories.each do |cat, posts|
+          category = CategoryPage.new(self, self.source, '', layout.name,
+                                      {:category => cat, :posts => posts})
+          category.render(self.layouts, site_payload)
+          category.write(self.dest)
         end
       end
 

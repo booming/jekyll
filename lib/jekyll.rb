@@ -32,6 +32,7 @@ require 'jekyll/layout'
 require 'jekyll/page'
 require 'jekyll/post'
 require 'jekyll/archive'
+require 'jekyll/category_page'
 require 'jekyll/filters'
 require 'jekyll/albino'
 require 'jekyll/static_file'
@@ -67,6 +68,7 @@ module Jekyll
     'pygments'     => false,
     'markdown'     => 'maruku',
     'permalink'    => 'date',
+    'category_permalink' => 'none',
 
     'maruku'       => {
       'use_tex'    => false,
