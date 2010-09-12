@@ -25,6 +25,7 @@ module Jekyll
         haml_engine.render(Jekyll::HamlHelpers, payload)
       rescue StandardError => e
         STDERR.puts 'HAML parsing error: ' + e.message
+        STDERR.puts e.backtrace
         raise FatalException
       end
     end

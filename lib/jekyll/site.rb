@@ -66,6 +66,8 @@ module Jekyll
         end
 
         require File.join(File.dirname(__FILE__), 'haml_helpers')
+        # Haml helpers can have access to the site config stuff.
+        Jekyll::HamlHelpers.site = self
       end
 
       # If safe mode is off, load in any ruby files under the plugins
@@ -79,8 +81,10 @@ module Jekyll
         if File.exists?(helpers)
           require helpers
           # Add the helpers to Liquid and if enabled Haml helpers.
-          Jekyll::Filters.extend(Jekyll::Helpers)
-          Jekyll::HamlHelpers.extend(Jekyll::Helpers) if self.config['haml']
+          if defined?(Jekyll::Helpers)
+            Jekyll::Filters.extend(Jekyll::Helpers)
+            Jekyll::HamlHelpers.extend(Jekyll::Helpers) if self.config['haml']
+          end
         end
       end
 

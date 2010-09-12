@@ -43,5 +43,13 @@ module Jekyll
       end
     end
 
+    def category_slug(cat)
+      cat.downcase.gsub(/[^a-zA-Z0-9\.\-]/, '-')
+    end
+
+    def category_capitalize(cat)
+      cat.split.map { |c| c.capitalize }.join
+    end
+
   end
 end
